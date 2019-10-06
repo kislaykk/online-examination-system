@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Admin login</title>
+</head>
+<body>
+    <h1>Login </h1>
+    
+    <form method="post">
+            {{form.hidden_tag()}}
+            {{form.email_id.label}}{{form.email_id}}
+            <br>
+            {{form.password.label}}{{form.password}}
+            <br>
+            {{form.login}}
+    
+    </form>
+            
+    
+</body>
+</html>

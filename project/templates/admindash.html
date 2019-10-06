@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>administrator dasboard</title>
+</head>
+<body>
+    {% if 'admin' not in session %}
+    <h1>you must login first</h1>
+    {% else %}
+    hello, 
+    {{session['admin']}}
+    <br>
+    institute id:{{session['iid']}}
+    <br>
+    what do you want to do?
+    <br>
+    <a href="{{url_for('addstudent')}}">add student</a>
+    <a href="{{url_for('studentlist')}}"> see student list</a>
+    <a href="{{url_for('deletestudent')}}">delete a student</a>
+    <a href="{{url_for('logouta')}}">logout</a>
+    {% endif %}
+</body>
+</html>

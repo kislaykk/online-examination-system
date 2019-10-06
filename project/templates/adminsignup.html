@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Admin signup</title>
+    
+</head>
+<body>
+        <h1>Please fill in your detail</h1>
+        <form method="post">
+            {{form.hidden_tag()}}
+            <br>
+            {{form.admin_name.label}}{{form.admin_name}}
+            <br>
+            {{form.email_id.label}}{{form.email_id}}
+            <br>
+            {{form.institute.label}}{{form.institute}}
+            <br>
+            {{form.password.label}}{{form.password}}
+            <br>
+            {{form.rpassword.label}}{{form.rpassword}}
+            <br>
+            {{form.signup}}
+        </form>
+</body>
+</html>
