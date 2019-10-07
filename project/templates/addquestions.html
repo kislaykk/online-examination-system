@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Add questions</title>
+</head>
+<body>
+    {% if session['iid'] %}
+    <h1>add questions here</h1>
+    <form method="POST">
+    
+    <a href="{{url_for('admindashboard')}}"> return to dashboard</a><br>
+    {{form.hidden_tag()}}
+    {{form.pid.label}}{{form.pid}} <br>
+    <h3>Enter the question text here:</h3>
+    {{form.question}}
+    <br>
+    {{form.optionA.label}}{{form.optionA}}
+    <br>
+    {{form.optionB.label}}{{form.optionB}}
+    <br>
+    {{form.optionC.label}}{{form.optionC}}
+    <br>
+    {{form.optionD.label}}{{form.optionD}}
+    <br>
+    <i>please enter the digit notation for option .for eg 1 for A , 2 for B...</i>
+    <br>
+    {{form.rightanswer.label}}{{form.rightanswer}}
+    <br>
+    {{form.submit}}
+    </form>
+    {% else %}
+    <h1>login first</h1>
+    {% endif %}
+    
+</body>
+</html>
