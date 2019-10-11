@@ -17,10 +17,16 @@
     <br>
     what do you want to do?
     <br>
-    <a href="{{url_for('addstudent')}}">add student</a>
-    <a href="{{url_for('studentlist')}}"> see student list</a>
-    <a href="{{url_for('deletestudent')}}">delete a student</a>
-    <a href="{{url_for('logouta')}}">logout</a>
+    <a href="{{url_for('addstudent')}}">add student</a><br>
+    <a href="{{url_for('studentlist')}}"> see student list</a><br>
+    <a href="{{url_for('deletestudent')}}">delete a student</a><br>
+    <a href="{{url_for('addpaper')}}">add paper</a><br>
+    <a href="{{url_for('addquestion')}}">add questions</a><br>
+    <a href="{{url_for('seepapers')}}">see papers</a> <br>
+    <a href="{{url_for('seequestions')}}">see questions</a> <br>
+    <a href="{{url_for('deletequestions')}}">delete questions</a><br>
+    <a href="{{url_for('deletepaper')}}">delete paper</a> <br>
+    <a href="{{url_for('logouta')}}">logout</a><br>
     {% endif %}
 </body>
 </html>
