@@ -4,18 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Add student</title>
+    <title>Add questions</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-    {% if 'admin' in session %}
-    <a href="{{url_for('admindashboard')}}"> return to dashboard</a>
+    {% if session['iid'] %}
+    <h1>add questions here</h1>
+    <form method="POST">
+    
+    <a href="{{url_for('admindashboard')}}"> return to dashboard</a><br>
+    {{form.hidden_tag()}}
+    
+    <h3>Enter the question text here:</h3>
+    {{form.question}}
     <br>
-    <form method="post">
-        
-        {{form.hidden_tag()}}
-        {{form.name.label}}{{form.name}}
-        {{form.submit}}
+    {{form.optionA.label}}{{form.optionA}}
+    <br>
+    {{form.optionB.label}}{{form.optionB}}
+    <br>
+    {{form.optionC.label}}{{form.optionC}}
+    <br>
+    {{form.optionD.label}}{{form.optionD}}
+    
+    <br>
+    {{form.rightanswer.label}}<br>{{form.rightanswer}}
+    <br>
+    {{form.submit}}
     </form>
     {% else %}
     <h1>login first</h1>

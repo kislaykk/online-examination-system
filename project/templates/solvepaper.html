@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Solve paper</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+
+</head>
+<body>
+    <h1>{{papername}}</h1>
+    <div class='sticky'><p id='timer'></p></div>
+    {% set qno = 1 %}
+    <form action="{{url_for('calculateresult')}}" method="post">
+        {% for qu in qus %}
+        {{qu.q}}
+        <br>
+        <input type="radio" name="{{qu.qid}}" id="1" value="1">{{qu.a}} <br>
+        <input type="radio" name="{{qu.qid}}" id="2" value="2">{{qu.b}} <br>
+        <input type="radio" name="{{qu.qid}}" id="3" value="3">{{qu.c}} <br>
+        <input type="radio" name="{{qu.qid}}" id="3" value="4">{{qu.d}} <br>
+        <br>
+        <br><br>
+        
+        
+        {% endfor %}
+
+        <input type="submit" id='aya'>
+    </form>
+    <script>
+    
+            var counter=0;
+    var timeleft={{time}}*60;
+    function convertSeconds(s)
+    {
+        var min=Math.floor(s/60) ;
+        
+        var sec=s%60;
+    
+        return min+"mins"+sec+"sec";
+    }
+      
+        
+        
+        function timeIt(){
+            counter++;
+            if(timeleft-counter<=0)
+            document.getElementById('aya').click();
+            else
+            document.getElementById("timer").innerHTML =convertSeconds(timeleft-counter);
+        }
+    
+        setInterval(timeIt,1000);
+    
+        </script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<style>
+div.sticky {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    background-color: rgba(0, 174, 255, 0.568);
+    padding: 20px;
+    font-size: 20px;
+  }
+  </style>
+</body>
+</html>

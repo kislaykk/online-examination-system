@@ -19,6 +19,48 @@ class AddStudent(FlaskForm):
     name=wtforms.StringField('Student name:',validators=[DataRequired(message='input student name')])
     submit=wtforms.SubmitField('Add Student')
 
-class DeleteStudent(FlaskForm):
-    id=wtforms.IntegerField('enter student id:',validators=[DataRequired(message='input student id')])
-    submit=wtforms.SubmitField('Delete student')
+
+class AddPaper(FlaskForm):
+    pname=wtforms.StringField('paper name:',validators=[DataRequired(message='input paper name')])
+    passm=wtforms.IntegerField('passing percentage',validators=[DataRequired(message='please enter the passing percentage')])
+    nm=wtforms.RadioField('negative marking?',choices=[('-1','yes'),('0','no')])
+    awm=wtforms.IntegerField('how much marks should 1 question hold?',validators=[DataRequired(message='please enter the marks of on question')])
+    tm=wtforms.SelectField(u'Time Limit:',choices=[('5','5 mins'),('15','15 mins'),('30','30 mins'),('60','1 hrs'),('120','2 hrs'),('180','3 hrs')])
+    submit=wtforms.SubmitField('Add Paper')
+
+class AddQuestion(FlaskForm):
+    
+    question=wtforms.TextAreaField(validators=[DataRequired()])
+    optionA=wtforms.StringField('OptionA',validators=[DataRequired()])
+    optionB=wtforms.StringField('OptionB',validators=[DataRequired()])
+    optionC=wtforms.StringField('OptionC',validators=[DataRequired()])
+    optionD=wtforms.StringField('OptionD',validators=[DataRequired()])
+    rightanswer = wtforms.SelectField(u'right option number?',choices=[('1', 'a'), ('2', 'b'),('3', 'c'),('4','d')])
+    submit=wtforms.SubmitField('Submit')
+
+class SeeQuestion(FlaskForm):
+    pid=wtforms.IntegerField('enter paper id:',validators=[DataRequired()])
+    submit=wtforms.SubmitField('see questions')
+
+class DeleteQuestion(FlaskForm):
+    qid=wtforms.IntegerField('enter question id:',validators=[DataRequired()])
+    submit=wtforms.SubmitField('delete question')
+
+class DeletePaper(FlaskForm):
+    pid=wtforms.IntegerField('enter the paper id:',validators=[DataRequired()])
+    submit=wtforms.SubmitField('delete paper')
+
+class StudentLogin(FlaskForm):
+    sid=wtforms.IntegerField('enter id:',validators=[DataRequired()])
+    sname=wtforms.StringField('enter name:',validators=[DataRequired()])
+    iid=wtforms.IntegerField('enter institute id:',validators=[DataRequired()])
+    submit=wtforms.SubmitField('Log In')
+
+class GiveExam(FlaskForm):
+    pid=wtforms.IntegerField('enter paper id:',validators=[DataRequired()])
+    submit=wtforms.SubmitField('lets begin the exam')
+    
+class SeeResult(FlaskForm):
+    pid=wtforms.IntegerField('enter paper id:',validators=[DataRequired()])
+    submit=wtforms.SubmitField('check result')
+

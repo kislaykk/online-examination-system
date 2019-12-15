@@ -1,5 +1,5 @@
-from flask import Flask,render_template,session,url_for,session,redirect
-from forms import AdminSignup,AdminLogin,AddStudent,DeleteStudent
+from flask import Flask,render_template,session,url_for,session,redirect,request
+from forms import *
 from werkzeug.security import generate_password_hash,check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate 
@@ -61,6 +61,67 @@ class Student(db.Model):
     def __init__(self,sname,iid):
         self.sname=sname
         self.iid=iid
+
+class Paper(db.Model):
+    __tablename__='paper'
+    pid=db.Column(db.Integer,primary_key=True)
+    pname=db.Column(db.Text)
+    iid=db.Column(db.Integer)
+    passm=db.Column(db.Integer)
+    nm=db.Column(db.Integer) #penalty marks(depends on yes or no)
+    awm=db.Column(db.Integer) #awarded mark for right answer
+    tm=db.Column(db.Integer)
+    ques=db.relationship('Question',backref='pappers',lazy='dynamic')
+    def __init__(self,pname,iid,passm,nm,awm,tm):
+        self.pname=pname
+        self.iid=iid
+        self.passm=passm
+        self.nm=nm
+        self.awm=awm
+        self.tm=tm
+
+class Question(db.Model):
+    __tablename__='questions'
+    qid=db.Column(db.Integer,primary_key=True)
+    iid=db.Column(db.Integer)
+    q=db.Column(db.Text)
+    a=db.Column(db.Text)
+    b=db.Column(db.Text)
+    c=db.Column(db.Text)
+    d=db.Column(db.Text)
+    ans=db.Column(db.Integer)
+    pid=db.Column(db.Integer,db.ForeignKey('paper.pid'))
+    def __init__(self,iid,pid,q,a,b,c,d,ans):
+        self.pid=pid
+        self.iid=iid
+        self.q=q
+        self.a=a
+        self.b=b
+        self.c=c
+        self.d=d
+        self.ans=ans
+
+class Result(db.Model):
+    __tablename__='result'
+    res_id=db.Column(db.Integer,primary_key=True)
+    sid=db.Column(db.Integer)
+    iid=db.Column(db.Integer)
+    pid=db.Column(db.Integer)
+    n_r=db.Column(db.Integer)
+    n_w=db.Column(db.Integer)
+    n_an=db.Column(db.Integer)
+    percent=db.Column(db.Integer)
+    status=db.Column(db.Text)
+
+    def __init__(self,sid,iid,pid,n_r,n_w,n_an,percent,status):
+        self.sid=sid
+        self.iid=iid
+        self.pid=pid
+        self.n_an=n_an
+        self.n_r=n_r
+        self.n_w=n_w
+        self.percent=percent
+        self.status=status
 #################################TABLE model#####################################
 
 @app.route('/')
@@ -69,10 +130,19 @@ def welcome():
 @app.route('/adashboard',methods=['POST','GET'])
 def admindashboard():
     return render_template('admindash.html')
+@app.route('/stdash')
+def stdash():
+    if 'sid' in session and 'sname' in session and 'iid' in session:
+
+        return render_template('studentdash.html')
+    else:
+        return 'login first'
 @app.route('/loginadmin',methods=['POST','GET'])
 def logina():
     form=AdminLogin()
-  
+    if 'admin' in session:
+        session.pop('admin',None)
+        session.pop('iid',None)
     if form.validate_on_submit():
         
         row=Admin.query.filter_by(admin=form.email_id.data).first()
@@ -98,24 +168,125 @@ def addstudent():
 
     return render_template('addstudent.html',form=form)
 
-@app.route('/deletestudent',methods=['POST','GET'])
+@app.route('/deletestudent',methods=['POST'])
 def deletestudent():
-    form=DeleteStudent()
-    if form.validate_on_submit():
-        id=form.id.data
+    for k,v in request.form.items():
+        id=int(k)
         del_st=Student.query.get(id)
-        if del_st is not None:
-            db.session.delete(del_st)
-            db.session.commit()
-        else:
-            return 'data does\'nt exists'
+        db.session.delete(del_st)
+        db.session.commit()
 
-    return render_template('deletestudent.html',form=form)
+    return redirect(url_for('studentlist'))
 @app.route('/studentlist')
 def studentlist():
     slist=Student.query.filter_by(iid=session['iid'])
-    print(slist[0])
     return render_template('studentlist.html',slist=slist)
+@app.route('/addpaper',methods=['POST','GET'])
+def addpaper(): 
+    form=AddPaper()
+    if form.validate_on_submit():
+        papinst=Paper(form.pname.data,session['iid'],int(form.passm.data),int(form.nm.data),int(form.awm.data),int(form.tm.data))
+        db.session.add(papinst)
+        db.session.commit()
+        return redirect(url_for('admindashboard'))
+    return render_template('addpaper.html',form=form)
+@app.route('/inv',methods=['POST'])
+def invisible():
+    session['pid']=list(request.form.keys())[0]
+    
+    return redirect(url_for('addquestion'))
+@app.route('/addq',methods=['POST','GET'])
+def addquestion():
+    
+    form=AddQuestion()
+    if form.validate_on_submit():
+        q=form.question.data  
+        a=form.optionA.data
+        b=form.optionB.data
+        c=form.optionC.data
+        d=form.optionD.data
+        ans=int(form.rightanswer.data)
+        if Paper.query.get(int(session['pid'])) is not None:
+            qformed=Question(session['iid'],int(session['pid']),q,a,b,c,d,ans)
+            db.session.add(qformed)
+            db.session.commit()
+            session.pop('pid',None)
+            return redirect(url_for('seepapers'))
+        else:
+            return 'paper not found'
+    return render_template('addquestions.html',form=form)
+@app.route('/seepapers')
+def seepapers():
+    pap=Paper.query.filter_by(iid=session['iid'])
+    if pap is None:
+        return 'No paper exists'
+    return render_template('seepapers.html',pap=pap)
+
+@app.route('/deletequestions',methods=['POST'])
+def deletequestions():
+    qid=None 
+    for k,v in request.form.items():
+        l=k.split(',')
+        qid=int(l[0])
+        pid=int(l[1])
+
+        qu=Question.query.get(qid)
+        db.session.delete(qu)
+        db.session.commit()
+    qus=Question.query.filter_by(pid=pid,iid=session['iid'])
+    return render_template('seequestionlist.html',qus=qus)
+
+@app.route('/seequestions',methods=['POST','GET'])
+def seequestions():
+    
+    #form=SeeQuestion()
+    #if form.validate_on_submit():
+    pid=list(request.form.keys())[0]
+    print(pid)
+    
+
+    qus=Question.query.filter_by(pid=pid,iid=session['iid'])
+    return render_template('seequestionlist.html',qus=qus)
+   # return render_template('seequestions.html',form=form)
+
+@app.route('/deletepaper',methods=['POST','GET'])
+def deletepaper():
+    pid=None 
+    for k,v in request.form.items():
+        pid=int(k)
+    qus=Question.query.filter_by(pid=pid,iid=session['iid'])
+        
+    pap=Paper.query.get(pid)
+    for j in qus:
+        db.session.delete(j)
+    db.session.delete(pap)
+                
+    db.session.commit()
+    return redirect(url_for('seepapers'))
+    
+@app.route('/seeresult',methods=['POST','GET'])
+def seeresult():
+    
+    papersava=Paper.query.filter_by(iid=session['iid'])
+    
+    return render_template('seeresult.html',papersava=papersava)
+
+
+@app.route('/seeresulta',methods=['POST','GET'])
+def seeresultand():
+    try:
+        pida=list(request.form.keys())[0]
+        pida=int(request.form[pida])
+        rs=Result.query.filter_by(pid=pida,sid=session['sid'])
+        rs=rs[0]
+        papn=Paper.query.get(pida)
+        papn=papn.pname
+            #return"paper name:{0} \nright answers:{1}\nwrong answers:{2} \nunanswered:{3} \npercentage:{4}\nstatus:{5}".format(papn,rs.n_r,rs.n_w,rs.n_an,rs.percent,rs.status)
+        return render_template('studentresult.html',name=session['sname'],no_right_answer=rs.n_r,no_wrong_answer=rs.n_w,unaswered=rs.n_an,percentage=rs.percent,status=rs.status)
+    except:
+        return 'paper yet to give'
+
+    
 @app.route('/logouta')
 def logouta():
     if 'admin' in session:
@@ -124,10 +295,110 @@ def logouta():
         return redirect(url_for('welcome'))
     else:
         return 'you must sign in first'
-@app.route('/loginstudent')
+@app.route('/loginstudent',methods=['POST','GET'])
 def studentl():
-    return render_template('studentlogin.html')
+    form=StudentLogin()
+    if form.validate_on_submit():
+        if 'admin' in session or 'iid' in session:
+            session.pop('admin',None)
+            session.pop('iid',None)
+        if 'sid' in session:
+            session.pop('sid',None)
+            session.pop('sname',None)
+            session.pop('iid',None)
+        q=Student.query.get(form.sid.data)
+        if q.stid==form.sid.data and q.sname==form.sname.data and q.iid==form.iid.data:
+            session['sid']=form.sid.data
+            session['sname']=form.sname.data
+            session['iid']=form.iid.data
+            return redirect(url_for('stdash'))
+        
+    return render_template('studentlogin.html',form=form)
+@app.route('/gvexmn',methods=['POST','GET'])
+def giveexam():
 
+    papersava=Paper.query.filter_by(iid=session['iid'])
+    
+    return render_template('giveexam.html',papersava=papersava)
+
+@app.route('/newpapsub',methods=['POST','GET'])
+def newone():
+    pid=request.form
+    pid=int(pid['paperselect'])
+    time=Paper.query.get(pid)
+    time=time.tm
+    session['pid']=pid
+    qus=Question.query.filter_by(pid=pid,iid=session['iid'])
+    papername=Paper.query.get(pid)
+    paperiid=papername.iid
+    if paperiid is not session['iid']:
+        return 'bad input'
+    papername=papername.pname
+        
+    return render_template('solvepaper.html',qus=qus,papername=papername,time=time)
+
+@app.route('/calc',methods=['POST'])
+def calculateresult():
+    paper=Paper.query.get(session['pid'])
+    neg=paper.nm 
+    peg=paper.awm 
+    passm=paper.passm
+    papername=paper.pname
+    no_right_answer=0
+    no_wrong_answer=0
+    no_of_questions=0
+    for k,v in request.form.items():
+        row=Question.query.get(int(k))
+        if int(v)==row.ans:
+            no_right_answer=no_right_answer+1
+        else:
+            no_wrong_answer=no_wrong_answer+1
+    questions=Question.query.filter_by(pid=session['pid'])
+    
+    for q in questions:
+        no_of_questions=no_of_questions+1
+    unaswered=no_of_questions-no_right_answer-no_wrong_answer
+    marks_got=(no_right_answer*peg)+(no_wrong_answer*neg)
+    tot_marks=no_of_questions*peg
+    percentage=(marks_got/tot_marks)*100
+    percentage=int(percentage)
+    if percentage<0:
+        percentage=0
+    if percentage>=passm:
+        status='pass'
+    else:
+        status='fail'
+    
+    try:
+        rs=Result.query.filter_by(sid=session['sid'],iid=session['iid'],pid=session['pid'])
+        rs=rs[0]
+        rs.n_w=no_wrong_answer
+        rs.n_r=no_right_answer
+        rs.n_an=unaswered
+        rs.percent=percentage
+        rs.status=status
+        db.session.add(rs)
+        db.session.commit()
+    except:    
+        rs=Result(session['sid'],session['iid'],session['pid'],no_right_answer,no_wrong_answer,unaswered,percentage,status)
+        db.session.add(rs)
+        db.session.commit()
+    #return "hi {0} ,\n number of right answer{1} \n number of wrong answer{2} \n number of unanswered:{3} \n percentage:{4} \n status:{5}".format(session['sname'],no_right_answer,no_wrong_answer,unaswered,percentage,status)
+    return render_template('studentresult.html',name=session['sname'],no_right_answer=no_right_answer,no_wrong_answer=no_wrong_answer,unaswered=unaswered,percentage=percentage,status=status)
+
+@app.route('/stlogout')
+def studentlogout():
+    if 'sid' in session:
+        session.pop('sid',None)
+        session.pop('sname',None)
+        session.pop('iid',None)
+        try:
+            session.pop('pid',None)
+        except:
+            pass
+        return redirect(url_for('welcome'))
+    else:
+        return 'login first'
 
 @app.route('/signupadmin',methods=['POST','GET'])
 def adminu():
@@ -151,7 +422,23 @@ def adminu():
 
         
     return render_template('adminsignup.html',form=form)
-
+@app.route('/adseeres',methods=['POST','GET'])
+def adseeres():
+    papersava=Paper.query.filter_by(iid=session['iid'])
+    
+    return render_template('admseeresult.html',papersava=papersava)
+    #form=SeeResult()
+    #if form.validate_on_submit():
+    #    rows=Result.query.filter_by(iid=session['iid'],pid=form.pid.data)
+    #    print(rows)
+    #    return render_template('adseeresult.html',rows=rows)
+    #return render_template('admseeresult.html',form=form)
+@app.route('/sendres',methods=['POST','GET'])
+def adseeresaa():
+    pida=list(request.form.keys())[0]
+    pida=int(request.form[pida])
+    rows=Result.query.filter_by(iid=session['iid'],pid=pida)
+    return render_template('adseeresult.html',rows=rows)
 if __name__=='__main__':
     app.run(debug=True)
 
